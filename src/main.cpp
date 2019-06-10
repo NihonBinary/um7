@@ -211,6 +211,21 @@ void publishMsgs(um7::Registers& r, ros::NodeHandle* imu_nh, sensor_msgs::Imu& i
   static ros::Publisher rpy_pub = imu_nh->advertise<geometry_msgs::Vector3Stamped>("rpy", 1, false);
   static ros::Publisher temp_pub = imu_nh->advertise<std_msgs::Float32>("temperature", 1, false);
 
+  static bool first_time = true;
+  static double acc_off_x = 0.0;
+  static double acc_off_y = 0.0;
+  static double acc_off_z = 0.0;
+  if(first_time)
+  {
+    ros::param::get("~/acc_off_x", acc_off_x);
+    ros::param::get("~/acc_off_y", acc_off_y);
+    ros::param::get("~/acc_off_z", acc_off_z);
+    printf("~/acc_off_x = %f\n", acc_off_x);
+    printf("~/acc_off_y = %f\n", acc_off_y);
+    printf("~/acc_off_z = %f\n", acc_off_z);
+    first_time = false;
+  }
+
   if (imu_pub.getNumSubscribers() > 0)
   {
     // body-fixed frame NED to ENU: (x y z)->(x -y -z) or (w x y z)->(x -y -z w)
@@ -248,6 +263,11 @@ void publishMsgs(um7::Registers& r, ros::NodeHandle* imu_nh, sensor_msgs::Imu& i
       imu_msg.linear_acceleration.y = r.accel.get_scaled(1);
       imu_msg.linear_acceleration.z = r.accel.get_scaled(2);
     }
+
+    // offset correction
+    imu_msg.linear_acceleration.x += acc_off_x;
+    imu_msg.linear_acceleration.y += acc_off_y;
+    imu_msg.linear_acceleration.z += acc_off_z;
 
     imu_pub.publish(imu_msg);
   }

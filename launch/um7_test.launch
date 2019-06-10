@@ -1,0 +1,9 @@
+<launch>
+
+    <node pkg="um7" name="um7_driver" type="um7_driver">
+        <param name="acc_off_x" value="0.13" />
+        <param name="acc_off_y" value="4.24" />
+        <param name="acc_off_z" value="0.0" />
+    </node>
+
+</launch>
